@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>شروحات</title>
+<style>
+:root{--white:#f7f7f7;--black:#030303;--gray:#6f6f6f;--silver:#c7c7c7;--radius:24px}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%}
+body{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;color:var(--white);background:radial-gradient(circle at top,rgba(255,255,255,.07),transparent 32%),var(--black);overflow-x:hidden;direction:rtl;text-align:right}
+body::before,body::after{content:"";position:fixed;inset:-10%;pointer-events:none;z-index:0}
+body::before{background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.1),transparent 24%),radial-gradient(circle at 80% 10%,rgba(255,255,255,.06),transparent 16%),radial-gradient(circle at 50% 80%,rgba(255,255,255,.07),transparent 24%);filter:blur(24px)}
+body::after{background:radial-gradient(circle,rgba(255,255,255,.04),transparent 45%);mix-blend-mode:screen;filter:blur(40px)}
+#spaceCanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.95}
+.vignette{position:fixed;inset:0;z-index:0;background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,.15) 55%,rgba(0,0,0,.55) 100%);pointer-events:none}
+.app-shell{position:relative;z-index:2;min-height:100vh;padding:36px 24px 70px;max-width:1380px;margin:0 auto}
+.hero{text-align:center;padding:24px 0 20px}
+.brand{display:inline-flex;flex-direction:column;gap:10px;align-items:center;padding:16px 28px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(255,255,255,.05);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.28),inset 0 0 20px rgba(255,255,255,.03)}
+.brand-mark{font-size:.76rem;letter-spacing:.45em;text-transform:uppercase;color:var(--silver)}
+.brand-title{font-size:clamp(2rem,4vw,3.1rem);font-weight:800;letter-spacing:.2em;text-transform:uppercase;margin:0}
+.brand-subtitle{font-size:.93rem;color:var(--silver);letter-spacing:.2em;text-transform:uppercase}
+.search-wrap{max-width:760px;margin:28px auto 38px}
+.search-bar{position:relative;display:flex;align-items:center;gap:12px;border-radius:999px;padding:16px 20px;background:rgba(255,255,255,.07);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 30px rgba(0,0,0,.24);overflow:hidden}
+.search-bar::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent 20%,rgba(255,255,255,.08) 65%,transparent);transform:translateX(-100%);transition:transform .9s ease}
+.search-bar:hover::before{transform:translateX(100%)}
+.search-icon{font-size:1.05rem;color:var(--silver)}
+.search-bar input{flex:1;border:none;outline:none;background:transparent;color:var(--white);font-size:1rem;padding:2px 0}
+.search-bar input::placeholder{color:rgba(255,255,255,.55)}
+.games-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.game-card{position:relative;padding:16px;border-radius:var(--radius);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px);box-shadow:0 16px 40px rgba(0,0,0,.28);cursor:pointer;transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease}
+.game-card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 16px 40px rgba(0,0,0,.36)}
+.game-card:hover .card-image{transform:scale(1.01)}
+.game-card:hover .glow-dot{transform:scale(1.04);opacity:.9}
+.card-image{width:100%;height:230px;border-radius:18px;object-fit:cover;transition:transform .4s ease}
+.card-content{padding:16px 4px 4px}
+.card-title{font-size:1.18rem;margin:0 0 10px;font-weight:700;letter-spacing:.04em}
+.card-meta{display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.68);font-size:.9rem;margin-top:8px}
+.glow-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--white),var(--gray));box-shadow:0 0 20px rgba(255,255,255,.35)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:28px;z-index:10;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
+.modal-overlay.show{opacity:1;visibility:visible}
+.modal-panel{width:min(1180px,100%);max-height:90vh;overflow-y:auto;overflow-x:hidden;border-radius:30px;padding:28px;position:relative;background:rgba(10,10,10,.78);border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 40px rgba(0,0,0,.28);transform:scale(.98);opacity:0;transition:transform .2s ease,opacity .2s ease;backdrop-filter:blur(10px)}
+.modal-overlay.show .modal-panel{transform:scale(1);opacity:1}
+.modal-close{position:absolute;top:20px;right:20px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer;font-size:1rem}
+.modal-content{display:grid;grid-template-columns:1.04fr .96fr;gap:24px;align-items:start}
+.modal-artwork{position:relative;padding:14px;border-radius:28px;background:linear-gradient(140deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.16);overflow:hidden}
+.modal-artwork img{width:100%;border-radius:22px;display:block}
+.modal-stack{display:grid;gap:18px}
+.glass-card{border-radius:24px;padding:20px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.03));backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 24px rgba(0,0,0,.22);position:relative;overflow:hidden}
+.glass-card h3{font-size:1.06rem;letter-spacing:.22em;text-transform:uppercase;margin:0 0 16px;color:var(--silver)}
+.download-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:8px 4px 8px 0;padding:11px 16px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:var(--white);text-decoration:none;font-weight:700;transition:transform .25s ease,background .25s ease;font-size:.9rem}
+.download-btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.2)}
+.download-note{font-size:.88rem;color:var(--silver);margin:4px 0 10px}
+.download-actions{margin-bottom:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.accordion-list{display:grid;gap:10px}
+.accordion-item{width:100%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);border-radius:16px;padding:13px 15px;color:var(--white);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:transform .18s ease,border-color .18s ease}
+.accordion-item:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.26)}
+.accordion-title{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.04em}
+.accordion-icon{width:28px;height:28px;border-radius:999px;display:inline-grid;place-items:center;font-size:.9rem;border:1px solid rgba(255,255,255,.16);color:var(--silver)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .5s ease,margin-top .35s ease,opacity .35s ease;opacity:0;margin-top:0}
+.accordion-body.open{max-height:5000px;opacity:1;margin-top:8px}
+.content-block{margin:0;padding:12px 14px;border-radius:14px;color:rgba(255,255,255,.72);background:rgba(255,255,255,.04);line-height:1.7;border:1px solid rgba(255,255,255,.1);overflow:hidden}
+.content-block ul{margin:0;padding-right:18px}
+.content-block li{margin-bottom:8px}
+.content-block p{margin:0 0 8px}
+.content-block pre{direction:ltr;text-align:left;background:rgba(0,0,0,.3);padding:10px 14px;border-radius:10px;overflow-x:auto;font-family:"Cascadia Code","Consolas",monospace;font-size:.85rem;color:#e0e0e0;border:1px solid rgba(255,255,255,.08);margin:8px 0;white-space:pre;max-width:100%}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+@media(max-width:960px){.games-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.modal-content{grid-template-columns:1fr}}
+@media(max-width:640px){.app-shell{padding:20px 15px 60px}.games-grid{grid-template-columns:1fr}.brand{padding:14px 18px}.search-bar{padding:14px 16px}.modal-panel{padding:20px}}
+</style>
+</head>
+<body>
+<canvas id="spaceCanvas"></canvas>
+<div class="vignette"></div>
+<main class="app-shell">
+<header class="hero"><div class="brand"><span class="brand-mark"></span><h1 class="brand-title">v1</h1><span class="brand-subtitle"></span></div></header>
+<div class="search-wrap"><label class="sr-only" for="searchInput">بحث</label><div class="search-bar"><span class="search-icon">⌕</span><input id="searchInput" type="text" placeholder="ابحث عن لعبة..."/></div></div>
+<section class="games-grid" id="gamesGrid"></section>
+</main>
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+<div class="modal-panel">
+<button class="modal-close" id="modalClose">×</button>
+<div class="modal-content">
+<div class="modal-artwork"><img id="modalArtwork" alt="artwork"/></div>
+<div class="modal-stack">
+<div class="glass-card">
+<h3 id="modalTitle">Game Information</h3>
+<div class="download-actions" id="downloadActions"></div>
+<div class="accordion-list" id="guideAccordion"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+var ALLGAMES=[{
+id:1,
+title:"Fortnite",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6knIY25GNkf6UHKJBmVyMkjaDw2yJ-t6DqhrjuoqSn4areAlTQ5nqXTw&s=10",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"http://undetect.net/download/loader",
+requiresSubscription:false,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>قبل ما تبدأ، لازم تسوي الخطوات هذي بالترتيب عشان يشتغل بدون مشاكل:</p><ul>
+<li>أوقف الحماية الفورية من Windows</li>
+<li>أوقف Windows Defender بالكامل (استخدم برنامج Sordum DControl)</li>
+<li>احذف كل برامج الحماية (لا تكفي الإيقاف فقط)</li>
+<li>أوقف كل برامج التشغيل التلقائي</li>
+<li>أوقف Exploit Protection</li>
+<li>أوقف كل الـ Overlays إلا اللي تستخدمه مع هذا المنتج</li>
+<li>أعد تشغيل الجهاز بعد أي خطوة من هذي</li>
+<li>احذف Faceit و Vanguard بالكامل</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل اللودر من الروابط وضعه في مجلد منفصل</li>
+<li>شغّل الملف كمسؤول</li>
+<li>بعد تحديث اللودر، شغّله مرة ثانية</li>
+<li>اضغط Inject</li>
+<li>اللودر يغلق تلقائياً بعد النجاح - هذا طبيعي</li>
+<li>افتح اللعبة</li>
+<li>افتح القائمة بزر INSERT</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<p>اللعبة لا تدعم وضع الشاشة الكاملة الحصرية، لازم تستخدم: نافذة / بدون حدود / شاشة كاملة (نافذة).</p><p><strong>الخيار 1 - Discord Overlay:</strong></p><ul>
+<li>افتح إعدادات Discord → Game Overlay → فعّل الـ Overlay</li>
+<li>أوقف Legacy Overlay</li>
+<li>إذا شفت "No suitable overlay" أوقفه وفعله مرة ثانية</li>
+</ul><p><strong>الخيار 2 - Medal Overlay:</strong></p><ul>
+<li>حمّل من https://medal.tv/download</li>
+<li>سجّل حساب وفعّل الـ Overlay</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>الجهاز أعاد التشغيل 2-3 مرات:</strong> شغّل CMD كمسؤول واكتب bcdedit /set hypervisorlaunchtype auto</li>
+<li><strong>"Please launch SteelSeries moment overlay":</strong> أوقف وأعد تفعيل GeForce overlay</li>
+<li><strong>"Please launch SteelSeries Sonar overlay":</strong> اضغط ربط Sonar قبل التشغيل</li>
+<li><strong>تقلبات في القائمة أو شاشة سوداء:</strong> افتح SteelSeries → Settings → Moments → Capture and Sound → أوقف "Allow Moments to Capture While Gaming"</li>
+<li><strong>"Please disable Intel Rapid Storage Technology":</strong> لازم توقف RST</li>
+<li><strong>زر الربط ما يشتغل:</strong> أعد الحقن، وإذا ما نفع شغّل الـ Overlay كمسؤول</li>
+<li><strong>ما تظهر قائمة أو اللودر يغلق فوراً:</strong> ثبّت المكتبة من https://aka.ms/vs/17/release/vc_redist.x64.exe</li>
+<li><strong>"Unsupported Firmware":</strong> حوّل القرص إلى GPT والبايوس إلى UEFI</li>
+<li><strong>Error 0x296:</strong> أعد الحقن</li>
+<li><strong>"Unknown network error":</strong> تحقق من اتصالك بالإنترنت، إذا تستخدم VPN جرّب أوقفه</li>
+<li><strong>"Failed to allocate memory / to map memory":</strong> أعد تشغيل الجهاز، إذا ما نفع حمّل Autoruns من https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns وأوقف غير النظام من programs التشغيل</li>
+<li><strong>"Failed to load dependencies":</strong> أوقف كل الحماية واحذف كل Anti-Cheats</li>
+<li><strong>"Please uninstall Vanguard/Faceit first":</strong> احذف Vanguard/FaceIT من جهازك</li>
+<li><strong>"AES instruction set is not supported":</strong> المعالج لا يدعم AES، لا يمكن إصلاحه</li>
+<li><strong>"Please enable Intel VT-X/AMD-V in the BIOS":</strong> ادخل BIOS وفعّل Intel Virtualization Technology أو AMD-V أو SVM</li>
+<li><strong>"VMX/SVM is not supported":</strong> اذهب إلى Control Panel → Programs → Turn Windows features on or off وأوقف "Virtual Machine Platform" و "Hyper-V". إذا ما نفع شغّل CMD كمسؤول واكتب bcdedit /set hypervisorlaunchtype off ثم أعد التشغيل. لمستخدمي ويندوز 11: شغّل PowerShell كمسؤول وأدخل الأوامر التالية واحد واحد:
+<pre>takeown /F "C:\Windows\System32\hvix64.exe"
+icacls "C:\Windows\System32\hvix64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+takeown /F "C:\Windows\System32\hvax64.exe"
+icacls "C:\Windows\System32\hvax64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+del "C:\Windows\System32\hvix64.exe"
+del "C:\Windows\System32\hvax64.exe"</pre></li>
+<li><strong>"Either virtual or RAID disk is present":</strong> أوقف الـ Spoofer أو أوقف RAID من BIOS مع إعادة تثبيت ويندوز</li>
+<li><strong>"Unsupported firmware":</strong> حوّل القرص إلى GPT باستخدام mbr2gpt</li>
+<li><strong>"CRD failed at XXX / Failed to init render":</strong> للكمبيوتر المكتبي: كرت الشاشة قديم. للابتوب: أوقف الكرت المدمج من BIOS</li>
+<li><strong>"Incorrect HWID":</strong> شغّل CMD كمسؤول وأدخل:
+<pre>wmic diskdrive get Caption, SerialNumber
+wmic baseboard get SerialNumber</pre>
+إذا أمر فشل، في مشكلة في جهازك. جرّب إعادة تثبيت ويندوز</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+},
+{
+id:2,
+title:"PUBG",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjlMVsZxKI_1KlpMayzML5c5KAwvbhY419Hzs1n9dI39ZdJ8mKKI_BVUeb&s=10",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"http://undetect.net/download/loader",
+requiresSubscription:false,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>قبل ما تبدأ، لازم تسوي الخطوات هذي بالترتيب عشان يشتغل بدون مشاكل:</p><ul>
+<li>أوقف الحماية الفورية من Windows</li>
+<li>أوقف Windows Defender بالكامل (استخدم برنامج Sordum DControl)</li>
+<li>احذف كل برامج الحماية (لا تكفي الإيقاف فقط)</li>
+<li>أوقف كل برامج التشغيل التلقائي</li>
+<li>أوقف Exploit Protection</li>
+<li>أوقف كل الـ Overlays إلا اللي تستخدمه مع هذا المنتج</li>
+<li>أعد تشغيل الجهاز بعد أي خطوة من هذي</li>
+<li>احذف Faceit و Vanguard بالكامل</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل اللودر من الروابط وضعه في مجلد منفصل</li>
+<li>شغّل الملف كمسؤول</li>
+<li>بعد تحديث اللودر، شغّله مرة ثانية</li>
+<li>اضغط Inject</li>
+<li>افتح لعبة ببجي</li>
+<li>افتح القائمة بزر INSERT</li>
+<li>القائمة تظهر فقط داخل المباراة (في الـ Lobby ما تظهر)</li>
+<li>التحكم في القائمة بالأسهم</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<p>اللعبة لا تدعم وضع الشاشة الكاملة الحصرية، لازم تستخدم: نافذة / بدون حدود / شاشة كاملة (نافذة).</p><p><strong>الخيار 1 - Discord Overlay:</strong></p><ul>
+<li>افتح إعدادات Discord → Game Overlay → فعّل الـ Overlay</li>
+<li>أوقف Legacy Overlay</li>
+<li>إذا شفت "No suitable overlay" أوقفه وفعله مرة ثانية</li>
+</ul><p><strong>الخيار 2 - Medal Overlay:</strong></p><ul>
+<li>حمّل من https://medal.tv/download</li>
+<li>سجّل حساب وفعّل الـ Overlay</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>الجهاز أعاد التشغيل 2-3 مرات:</strong> شغّل CMD كمسؤول واكتب bcdedit /set hypervisorlaunchtype auto</li>
+<li><strong>"Please launch SteelSeries moment overlay":</strong> أوقف وأعد تفعيل GeForce overlay</li>
+<li><strong>"Please launch SteelSeries Sonar overlay":</strong> اضغط ربط Sonar قبل التشغيل</li>
+<li><strong>تقلبات في القائمة أو شاشة سوداء:</strong> افتح SteelSeries → Settings → Moments → Capture and Sound → أوقف "Allow Moments to Capture While Gaming"</li>
+<li><strong>"Please disable Intel Rapid Storage Technology":</strong> لازم توقف RST</li>
+<li><strong>زر الربط ما يشتغل:</strong> أعد الحقن، وإذا ما نفع شغّل الـ Overlay كمسؤول</li>
+<li><strong>ما تظهر قائمة أو اللودر يغلق فوراً:</strong> ثبّت المكتبة من https://aka.ms/vs/17/release/vc_redist.x64.exe</li>
+<li><strong>"Unsupported Firmware":</strong> حوّل القرص إلى GPT والبايوس إلى UEFI</li>
+<li><strong>Error 0x296:</strong> أعد الحقن</li>
+<li><strong>"Unknown network error":</strong> تحقق من اتصالك بالإنترنت، إذا تستخدم VPN جرّب أوقفه</li>
+<li><strong>"Failed to allocate memory / to map memory":</strong> أعد تشغيل الجهاز، إذا ما نفع حمّل Autoruns من https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns وأوقف غير النظام من programs التشغيل</li>
+<li><strong>"Failed to load dependencies":</strong> أوقف كل الحماية واحذف كل Anti-Cheats</li>
+<li><strong>"Please uninstall Vanguard/Faceit first":</strong> احذف Vanguard/FaceIT من جهازك</li>
+<li><strong>"AES instruction set is not supported":</strong> المعالج لا يدعم AES، لا يمكن إصلاحه</li>
+<li><strong>"Please enable Intel VT-X/AMD-V in the BIOS":</strong> ادخل BIOS وفعّل Intel Virtualization Technology أو AMD-V أو SVM</li>
+<li><strong>"VMX/SVM is not supported":</strong> اذهب إلى Control Panel → Programs → Turn Windows features on or off وأوقف "Virtual Machine Platform" و "Hyper-V". إذا ما نفع شغّل CMD كمسؤول واكتب bcdedit /set hypervisorlaunchtype off ثم أعد التشغيل. لمستخدمي ويندوز 11: شغّل PowerShell كمسؤول وأدخل الأوامر التالية واحد واحد:
+<pre>takeown /F "C:\Windows\System32\hvix64.exe"
+icacls "C:\Windows\System32\hvix64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+takeown /F "C:\Windows\System32\hvax64.exe"
+icacls "C:\Windows\System32\hvax64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+del "C:\Windows\System32\hvix64.exe"
+del "C:\Windows\System32\hvax64.exe"</pre></li>
+<li><strong>"Either virtual or RAID disk is present":</strong> أوقف الـ Spoofer أو أوقف RAID من BIOS مع إعادة تثبيت ويندوز</li>
+<li><strong>"Unsupported firmware":</strong> حوّل القرص إلى GPT باستخدام mbr2gpt</li>
+<li><strong>"CRD failed at XXX / Failed to init render":</strong> للكمبيوتر المكتبي: كرت الشاشة قديم. للابتوب: أوقف الكرت المدمج من BIOS</li>
+<li><strong>"Incorrect HWID":</strong> شغّل CMD كمسؤول وأدخل:
+<pre>wmic diskdrive get Caption, SerialNumber
+wmic baseboard get SerialNumber</pre>
+إذا أمر فشل، في مشكلة في جهازك. جرّب إعادة تثبيت ويندوز</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+},
+{
+id:3,
+title:"Apex Legends",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://assets.nintendo.com/image/upload/q_auto/f_auto/c_fill,w_1200/ncom/en_US/articles/2025/check-out-whats-new-this-season-with-apex-legends-tm-showdown/Apex_S26_PrimaryArt",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"http://undetect.net/download/loader",
+requiresSubscription:false,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>قبل ما تبدأ، لازم تسوي الخطوات هذي بالترتيب عشان يشتغل بدون مشاكل:</p><ul>
+<li>أوقف الحماية الفورية من Windows</li>
+<li>أوقف Windows Defender بالكامل (استخدم برنامج Sordum DControl)</li>
+<li>احذف كل برامج الحماية (لا تكفي الإيقاف فقط)</li>
+<li>أوقف كل برامج التشغيل التلقائي</li>
+<li>أوقف Exploit Protection</li>
+<li>أوقف كل الـ Overlays إلا اللي تستخدمه مع هذا المنتج</li>
+<li>أعد تشغيل الجهاز بعد أي خطوة من هذي</li>
+<li>احذف Faceit و Vanguard بالكامل</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل اللودر من الروابط وضعه في مجلد منفصل</li>
+<li>شغّل الملف كمسؤول</li>
+<li>بعد تحديث اللودر، شغّله مرة ثانية</li>
+<li>اضغط Inject</li>
+<li>افتح لعبة أيبكس</li>
+<li>افتح القائمة بزر INSERT</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<p>اللعبة لا تدعم وضع الشاشة الكاملة الحصرية، لازم تستخدم: نافذة / بدون حدود / شاشة كاملة (نافذة).</p><p><strong>الخيار 1 - Discord Overlay:</strong></p><ul>
+<li>افتح إعدادات Discord → Game Overlay → فعّل الـ Overlay</li>
+<li>أوقف Legacy Overlay</li>
+<li>إذا شفت "No suitable overlay" أوقفه وفعله مرة ثانية</li>
+</ul><p><strong>الخيار 2 - Medal Overlay:</strong></p><ul>
+<li>حمّل من https://medal.tv/download</li>
+<li>سجّل حساب وفعّل الـ Overlay</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>الجهاز أعاد التشغيل 2-3 مرات:</strong> شغّل CMD كمسؤول واكتب bcdedit /set hypervisorlaunchtype auto</li>
+<li><strong>"Please launch SteelSeries moment overlay":</strong> أوقف وأعد تفعيل GeForce overlay</li>
+<li><strong>"Please launch SteelSeries Sonar overlay":</strong> اضغط ربط Sonar قبل التشغيل</li>
+<li><strong>تقلبات في القائمة أو شاشة سوداء:</strong> افتح SteelSeries → Settings → Moments → Capture and Sound → أوقف "Allow Moments to Capture While Gaming"</li>
+<li><strong>"Please disable Intel Rapid Storage Technology":</strong> لازم توقف RST</li>
+<li><strong>زر الربط ما يشتغل:</strong> أعد الحقن، وإذا ما نفع شغّل الـ Overlay كمسؤول</li>
+<li><strong>ما تظهر قائمة أو اللودر يغلق فوراً:</strong> ثبّت المكتبة من https://aka.ms/vs/17/release/vc_redist.x64.exe</li>
+<li><strong>"Unsupported Firmware":</strong> حوّل القرص إلى GPT والبايوس إلى UEFI</li>
+<li><strong>Error 0x296:</strong> أعد الحقن</li>
+<li><strong>"Unknown network error":</strong> تحقق من اتصالك بالإنترنت، إذا تستخدم VPN جرّب أوقفه</li>
+<li><strong>"Failed to allocate memory / to map memory":</strong> أعد تشغيل الجهاز، إذا ما نفع حمّل Autoruns من https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns وأوقف غير النظام من programs التشغيل</li>
+<li><strong>"Failed to load dependencies":</strong> أوقف كل الحماية واحذف كل Anti-Cheats</li>
+<li><strong>"Please uninstall Vanguard/Faceit first":</strong> احذف Vanguard/FaceIT من جهازك</li>
+<li><strong>"AES instruction set is not supported":</strong> المعالج لا يدعم AES، لا يمكن إصلاحه</li>
+<li><strong>"Please enable Intel VT-X/AMD-V in the BIOS":</strong> ادخل BIOS وفعّل Intel Virtualization Technology أو AMD-V أو SVM</li>
+<li><strong>"VMX/SVM is not supported":</strong> اذهب إلى Control Panel → Programs → Turn Windows features on or off وأوقف "Virtual Machine Platform" و "Hyper-V". إذا ما نفع شغّل CMD كمسؤول واكتب bcdedit /set hypervisorlaunchtype off ثم أعد التشغيل. لمستخدمي ويندوز 11: شغّل PowerShell كمسؤول وأدخل الأوامر التالية واحد واحد:
+<pre>takeown /F "C:\Windows\System32\hvix64.exe"
+icacls "C:\Windows\System32\hvix64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+takeown /F "C:\Windows\System32\hvax64.exe"
+icacls "C:\Windows\System32\hvax64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+del "C:\Windows\System32\hvix64.exe"
+del "C:\Windows\System32\hvax64.exe"</pre></li>
+<li><strong>"Either virtual or RAID disk is present":</strong> أوقف الـ Spoofer أو أوقف RAID من BIOS مع إعادة تثبيت ويندوز</li>
+<li><strong>"Unsupported firmware":</strong> حوّل القرص إلى GPT باستخدام mbr2gpt</li>
+<li><strong>"CRD failed at XXX / Failed to init render":</strong> للكمبيوتر المكتبي: كرت الشاشة قديم. للابتوب: أوقف الكرت المدمج من BIOS</li>
+<li><strong>"Incorrect HWID":</strong> شغّل CMD كمسؤول وأدخل:
+<pre>wmic diskdrive get Caption, SerialNumber
+wmic baseboard get SerialNumber</pre>
+إذا أمر فشل، في مشكلة في جهازك. جرّب إعادة تثبيت ويندوز</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+},
+{
+id:4,
+title:"Arc Raiders",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1808500/f3fe86fea9920e2b201a04c746475415450abda4/capsule_616x353_alt_assets_5.jpg?t=1784099728",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"https://storage.e-arcane.com/LoaderArcane.zip",
+requiresSubscription:false,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>اتبع الخطوات هذي بالترتيب قبل ما تشغل البرنامج:</p><ul>
+<li>ثبّت المكتبات المطلوبة</li>
+<li>اقرأ التعليمات بعناية</li>
+<li>أعد تشغيل الجهاز قبل تشغيل البرنامج (إلزامي)</li>
+<li>أوقف Intel Rapid Storage Technology من BIOS</li>
+<li>تنبيه: استخدام البرامج على مسؤوليتك الخاصة. الحالة غير المكتشفة لا تضمن حماية 100%</li>
+<li>احذف برامج الحماية</li>
+<li>أوقف SmartScreen</li>
+<li>أوقف Windows Defender</li>
+<li>احذف FaceIt و Vanguard</li>
+<li>تأكد أنك تستخدم كرت شاشة NVIDIA أو AMD</li>
+<li>إذا NVIDIA: ثبّت NVIDIA App، سجّل الدخول، ثبّت أحدث إصدار لتعريف الكرت، فعّل NVIDIA overlay</li>
+<li>إذا AMD: ثبّت AMD Software: Adrenalin Edition (PRO لا يشتغل)، ثبّت أحدث تعريف، فعّل in-game overlay من الإعدادات، في تبويب الأداء فعّل عرض الأداء</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل اللودر من الروابط وضعه في مجلد منفصل</li>
+<li>شغّل الملف كمسؤول</li>
+<li>بعد تحديث اللودر، شغّله مرة ثانية</li>
+<li>أدخل المفتاح واضغط Enter (لإدخال المفتاح استخدم كليك يمين في CMD)</li>
+<li>اضغط Yes إذا تبي تنظيف الأثر</li>
+<li>اضغط Yes إذا تبي الـ HWID Spoofer</li>
+<li>اللودر يغلق تلقائياً بعد التحميل الناجح</li>
+<li>افتح اللعبة</li>
+<li>القائمة تظهر تلقائياً</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<ul>
+<li>افتح/أغلق القائمة بزر Home أو Insert</li>
+<li>لـ Unturned: زر DEL</li>
+<li>لـ PUBG: Insert (تظهر فقط داخل المباراة)</li>
+<li>إلغاء تحميل البرنامج: زر END</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>خطأ المكتبات العامة:</strong> ثبّت أحدث إصدار من المكتبات. إذا AMD وما نفع: أوقف كل عمليات AMD من Task Manager، اذهب إلى مجلد AMD Software، حمّل واستخرج Libs.rar واستبدل ملفات DLL في مجلد AMD</li>
+<li><strong>"Please make sure PIN is not set...":</strong> أوقف كلمة مرور تسجيل الدخول بالكامل، أوقف CPU virtualization من BIOS، شغّل PowerShell كمسؤول وأدخل الأوامر التالية:
+<pre>takeown /F "C:\Windows\System32\hvix64.exe"
+icacls "C:\Windows\System32\hvix64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+takeown /F "C:\Windows\System32\hvax64.exe"
+icacls "C:\Windows\System32\hvax64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+del "C:\Windows\System32\hvix64.exe"
+del "C:\Windows\System32\hvax64.exe"</pre></li>
+<li><strong>"Failed to map memory":</strong> إذا عندك أقل من 12GB RAM تواصل مع البائع. أوقف كل برامج التشغيل وأعد التشغيل. إذا ما نفع حمّل AutoRuns وأوقف كل برامج CurrentVersion\Run</li>
+<li><strong>اللودر يغلق بدون خطأ:</strong> ثبّت المكتبات من https://aka.ms/vs/17/release/vc_redist.x64.exe</li>
+<li><strong>تظهر القائمة لكن ما تقدر تتفاعل:</strong> شغّل الـ Overlay كمسؤول</li>
+<li><strong>ويندوز 10 - "Make sure all antiviruses are disabled":</strong> احذف كل برامج الحماية الثالثة، أوقف الحماية الفورية، أوقف SmartScreen</li>
+<li><strong>ويندوز 11 - "Make sure all antiviruses are disabled":</strong> حمّل ملفات Turn_ON و Turn_OFF، شغّل Turn_ON واف Consent وأعد التشغيل، ثم شغّل Turn_OFF وأعد التشغيل. إذا ما نفع تأكد من حذف الحماية</li>
+<li><strong>أخطاء أخرى من اللودر:</strong> أرسل لقطة شاشة للدعم</li>
+<li><strong>القائمة تظهر لكن ما تضغط:</strong> شغّل Steam بدون حقوق المسؤول، أوقف كل الـ Overlays الثالثة</li>
+<li><strong>القائمة تختفي أو الدوال ما تشتغل:</strong> إذا كان فيه تحديث للعبة انتظر تحديث المنتج، تحقق من سلامة ملفات اللعبة، أو أعد تثبيتها بالكامل</li>
+<li><strong>القائمة ما تضغط أو ما تفتح أول مرة:</strong> شغّل Steam بدون حقوق المسؤول، أوقف EA App overlay</li>
+<li><strong>"AES instruction set is not supported":</strong> لا يمكن إصلاحه. تواصل للاسترداد</li>
+<li><strong>"Please enable Intel VT-X in the BIOS":</strong> ادخل BIOS وفعّل Intel virtualization technology أو Intel VT-X</li>
+<li><strong>"Please enable AMD-V in BIOS":</strong> ادخل BIOS وفعّل AMD-V أو SVM mode</li>
+<li><strong>"Please disable secure boot in the BIOS":</strong> ادخل BIOS وأوقف Secure Boot</li>
+<li><strong>"Unsupported firmware":</strong> حوّل القرص إلى GPT باستخدام mbr2gpt</li>
+<li><strong>"Secure boot keys are incorrect and need to be enrolled":</strong> ادخل BIOS وفعّل Secure Boot واحفظ، تحقق بـ PowerShell: Confirm-SecureBootUEFI، إذا True أعد التشغيل، ثم أوقف Secure Boot من BIOS</li>
+<li><strong>"VMX/SVM is not supported":</strong> Control Panel → Turn Windows features on or off → أوقف Virtual Machine Platform و Hyper-V. إذا ما نفع: CMD كمسؤول → bcdedit /set hypervisorlaunchtype off → أعد التشغيل</li>
+<li><strong>"Incorrect HWID":</strong> CMD كمسؤول:
+<pre>wmic diskdrive get Caption, SerialNumber
+wmic baseboard get SerialNumber</pre>
+إذا أمر فشل، أعد تثبيت ويندوز</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+},
+{
+id:5,
+title:"DayZ",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQX8KokcnTEKLthzYQP1yALnZYrNR7Ck6TZi3CS4NPCKn5SdTHMA1IZiNE&s=10",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"https://storage.e-arcane.com/LoaderArcane.zip",
+requiresSubscription:false,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>اتبع الخطوات هذي بالترتيب قبل ما تشغل البرنامج:</p><ul>
+<li>ثبّت المكتبات المطلوبة</li>
+<li>اقرأ التعليمات بعناية</li>
+<li>أعد تشغيل الجهاز قبل تشغيل البرنامج (إلزامي)</li>
+<li>أوقف Intel Rapid Storage Technology من BIOS</li>
+<li>تنبيه: استخدام البرامج على مسؤوليتك الخاصة. الحالة غير المكتشفة لا تضمن حماية 100%</li>
+<li>احذف برامج الحماية</li>
+<li>أوقف SmartScreen</li>
+<li>أوقف Windows Defender</li>
+<li>احذف FaceIt و Vanguard</li>
+<li>تأكد أنك تستخدم كرت شاشة NVIDIA أو AMD</li>
+<li>إذا NVIDIA: ثبّت NVIDIA App، سجّل الدخول، ثبّت أحدث إصدار لتعريف الكرت، فعّل NVIDIA overlay</li>
+<li>إذا AMD: ثبّت AMD Software: Adrenalin Edition (PRO لا يشتغل)، ثبّت أحدث تعريف، فعّل in-game overlay من الإعدادات، في تبويب الأداء فعّل عرض الأداء</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل اللودر من الروابط وضعه في مجلد منفصل</li>
+<li>شغّل الملف كمسؤول</li>
+<li>بعد تحديث اللودر، شغّله مرة ثانية</li>
+<li>أدخل المفتاح واضغط Enter (لإدخال المفتاح استخدم كليك يمين في CMD)</li>
+<li>اضغط Yes إذا تبي تنظيف الأثر</li>
+<li>اضغط Yes إذا تبي الـ HWID Spoofer</li>
+<li>اللودر يغلق تلقائياً بعد التحميل الناجح</li>
+<li>افتح لعبة داي Z</li>
+<li>القائمة تظهر تلقائياً</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<ul>
+<li>افتح/أغلق القائمة بزر Home أو Insert</li>
+<li>لـ Unturned: زر DEL</li>
+<li>لـ PUBG: Insert (تظهر فقط داخل المباراة)</li>
+<li>إلغاء تحميل البرنامج: زر END</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>خطأ المكتبات العامة:</strong> ثبّت أحدث إصدار من المكتبات. إذا AMD وما نفع: أوقف كل عمليات AMD من Task Manager، اذهب إلى مجلد AMD Software، حمّل واستخرج Libs.rar واستبدل ملفات DLL في مجلد AMD</li>
+<li><strong>"Please make sure PIN is not set...":</strong> أوقف كلمة مرور تسجيل الدخول بالكامل، أوقف CPU virtualization من BIOS، شغّل PowerShell كمسؤول وأدخل الأوامر التالية:
+<pre>takeown /F "C:\Windows\System32\hvix64.exe"
+icacls "C:\Windows\System32\hvix64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+takeown /F "C:\Windows\System32\hvax64.exe"
+icacls "C:\Windows\System32\hvax64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+del "C:\Windows\System32\hvix64.exe"
+del "C:\Windows\System32\hvax64.exe"</pre></li>
+<li><strong>"Failed to map memory":</strong> إذا عندك أقل من 12GB RAM تواصل مع البائع. أوقف كل برامج التشغيل وأعد التشغيل. إذا ما نفع حمّل AutoRuns وأوقف كل برامج CurrentVersion\Run</li>
+<li><strong>اللودر يغلق بدون خطأ:</strong> ثبّت المكتبات من https://aka.ms/vs/17/release/vc_redist.x64.exe</li>
+<li><strong>تظهر القائمة لكن ما تقدر تتفاعل:</strong> شغّل الـ Overlay كمسؤول</li>
+<li><strong>ويندوز 10 - "Make sure all antiviruses are disabled":</strong> احذف كل برامج الحماية الثالثة، أوقف الحماية الفورية، أوقف SmartScreen</li>
+<li><strong>ويندوز 11 - "Make sure all antiviruses are disabled":</strong> حمّل ملفات Turn_ON و Turn_OFF، شغّل Turn_ON واف Consent وأعد التشغيل، ثم شغّل Turn_OFF وأعد التشغيل. إذا ما نفع تأكد من حذف الحماية</li>
+<li><strong>أخطاء أخرى من اللودر:</strong> أرسل لقطة شاشة للدعم</li>
+<li><strong>القائمة تظهر لكن ما تضغط:</strong> شغّل Steam بدون حقوق المسؤول، أوقف كل الـ Overlays الثالثة</li>
+<li><strong>القائمة تختفي أو الدوال ما تشتغل:</strong> إذا كان فيه تحديث للعبة انتظر تحديث المنتج، تحقق من سلامة ملفات اللعبة، أو أعد تثبيتها بالكامل</li>
+<li><strong>القائمة ما تضغط أو ما تفتح أول مرة:</strong> شغّل Steam بدون حقوق المسؤول، أوقف EA App overlay</li>
+<li><strong>"AES instruction set is not supported":</strong> لا يمكن إصلاحه. تواصل للاسترداد</li>
+<li><strong>"Please enable Intel VT-X in the BIOS":</strong> ادخل BIOS وفعّل Intel virtualization technology أو Intel VT-X</li>
+<li><strong>"Please enable AMD-V in BIOS":</strong> ادخل BIOS وفعّل AMD-V أو SVM mode</li>
+<li><strong>"Please disable secure boot in the BIOS":</strong> ادخل BIOS وأوقف Secure Boot</li>
+<li><strong>"Unsupported firmware":</strong> حوّل القرص إلى GPT باستخدام mbr2gpt</li>
+<li><strong>"Secure boot keys are incorrect and need to be enrolled":</strong> ادخل BIOS وفعّل Secure Boot واحفظ، تحقق بـ PowerShell: Confirm-SecureBootUEFI، إذا True أعد التشغيل، ثم أوقف Secure Boot من BIOS</li>
+<li><strong>"VMX/SVM is not supported":</strong> Control Panel → Turn Windows features on or off → أوقف Virtual Machine Platform و Hyper-V. إذا ما نفع: CMD كمسؤول → bcdedit /set hypervisorlaunchtype off → أعد التشغيل</li>
+<li><strong>"Incorrect HWID":</strong> CMD كمسؤول:
+<pre>wmic diskdrive get Caption, SerialNumber
+wmic baseboard get SerialNumber</pre>
+إذا أمر فشل، أعد تثبيت ويندوز</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+},
+{
+id:6,
+title:"Sea of Thieves",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://cms-assets.xboxservices.com/assets/a0/26/a0261fcf-e92f-48d6-83a1-9f4424a7c1b6.jpg?n=467176942_GLP-Page-Hero-1084_1920x1080_03.jpg",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"https://storage.e-arcane.com/LoaderArcane.zip",
+requiresSubscription:false,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>اتبع الخطوات هذي بالترتيب قبل ما تشغل البرنامج:</p><ul>
+<li>ثبّت المكتبات المطلوبة</li>
+<li>اقرأ التعليمات بعناية</li>
+<li>أعد تشغيل الجهاز قبل تشغيل البرنامج (إلزامي)</li>
+<li>أوقف Intel Rapid Storage Technology من BIOS</li>
+<li>تنبيه: استخدام البرامج على مسؤوليتك الخاصة. الحالة غير المكتشفة لا تضمن حماية 100%</li>
+<li>احذف برامج الحماية</li>
+<li>أوقف SmartScreen</li>
+<li>أوقف Windows Defender</li>
+<li>احذف FaceIt و Vanguard</li>
+<li>تأكد أنك تستخدم كرت شاشة NVIDIA أو AMD</li>
+<li>إذا NVIDIA: ثبّت NVIDIA App، سجّل الدخول، ثبّت أحدث إصدار لتعريف الكرت، فعّل NVIDIA overlay</li>
+<li>إذا AMD: ثبّت AMD Software: Adrenalin Edition (PRO لا يشتغل)، ثبّت أحدث تعريف، فعّل in-game overlay من الإعدادات، في تبويب الأداء فعّل عرض الأداء</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل اللودر من الروابط وضعه في مجلد منفصل</li>
+<li>شغّل الملف كمسؤول</li>
+<li>بعد تحديث اللودر، شغّله مرة ثانية</li>
+<li>أدخل المفتاح واضغط Enter (لإدخال المفتاح استخدم كليك يمين في CMD)</li>
+<li>اضغط Yes إذا تبي تنظيف الأثر</li>
+<li>اضغط Yes إذا تبي الـ HWID Spoofer</li>
+<li>اللودر يغلق تلقائياً بعد التحميل الناجح</li>
+<li>افتح لعبة سي أوف ثيفز</li>
+<li>القائمة تظهر تلقائياً</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<ul>
+<li>افتح/أغلق القائمة بزر Home أو Insert</li>
+<li>لـ Unturned: زر DEL</li>
+<li>لـ PUBG: Insert (تظهر فقط داخل المباراة)</li>
+<li>إلغاء تحميل البرنامج: زر END</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>خطأ المكتبات العامة:</strong> ثبّت أحدث إصدار من المكتبات. إذا AMD وما نفع: أوقف كل عمليات AMD من Task Manager، اذهب إلى مجلد AMD Software، حمّل واستخرج Libs.rar واستبدل ملفات DLL في مجلد AMD</li>
+<li><strong>"Please make sure PIN is not set...":</strong> أوقف كلمة مرور تسجيل الدخول بالكامل، أوقف CPU virtualization من BIOS، شغّل PowerShell كمسؤول وأدخل الأوامر التالية:
+<pre>takeown /F "C:\Windows\System32\hvix64.exe"
+icacls "C:\Windows\System32\hvix64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+takeown /F "C:\Windows\System32\hvax64.exe"
+icacls "C:\Windows\System32\hvax64.exe" /grant *$(([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value):F
+del "C:\Windows\System32\hvix64.exe"
+del "C:\Windows\System32\hvax64.exe"</pre></li>
+<li><strong>"Failed to map memory":</strong> إذا عندك أقل من 12GB RAM تواصل مع البائع. أوقف كل برامج التشغيل وأعد التشغيل. إذا ما نفع حمّل AutoRuns وأوقف كل برامج CurrentVersion\Run</li>
+<li><strong>اللودر يغلق بدون خطأ:</strong> ثبّت المكتبات من https://aka.ms/vs/17/release/vc_redist.x64.exe</li>
+<li><strong>تظهر القائمة لكن ما تقدر تتفاعل:</strong> شغّل الـ Overlay كمسؤول</li>
+<li><strong>ويندوز 10 - "Make sure all antiviruses are disabled":</strong> احذف كل برامج الحماية الثالثة، أوقف الحماية الفورية، أوقف SmartScreen</li>
+<li><strong>ويندوز 11 - "Make sure all antiviruses are disabled":</strong> حمّل ملفات Turn_ON و Turn_OFF، شغّل Turn_ON واف Consent وأعد التشغيل، ثم شغّل Turn_OFF وأعد التشغيل. إذا ما نفع تأكد من حذف الحماية</li>
+<li><strong>أخطاء أخرى من اللودر:</strong> أرسل لقطة شاشة للدعم</li>
+<li><strong>القائمة تظهر لكن ما تضغط:</strong> شغّل Steam بدون حقوق المسؤول، أوقف كل الـ Overlays الثالثة</li>
+<li><strong>القائمة تختفي أو الدوال ما تشتغل:</strong> إذا كان فيه تحديث للعبة انتظر تحديث المنتج، تحقق من سلامة ملفات اللعبة، أو أعد تثبيتها بالكامل</li>
+<li><strong>القائمة ما تضغط أو ما تفتح أول مرة:</strong> شغّل Steam بدون حقوق المسؤول، أوقف EA App overlay</li>
+<li><strong>"AES instruction set is not supported":</strong> لا يمكن إصلاحه. تواصل للاسترداد</li>
+<li><strong>"Please enable Intel VT-X in the BIOS":</strong> ادخل BIOS وفعّل Intel virtualization technology أو Intel VT-X</li>
+<li><strong>"Please enable AMD-V in BIOS":</strong> ادخل BIOS وفعّل AMD-V أو SVM mode</li>
+<li><strong>"Please disable secure boot in the BIOS":</strong> ادخل BIOS وأوقف Secure Boot</li>
+<li><strong>"Unsupported firmware":</strong> حوّل القرص إلى GPT باستخدام mbr2gpt</li>
+<li><strong>"Secure boot keys are incorrect and need to be enrolled":</strong> ادخل BIOS وفعّل Secure Boot واحفظ، تحقق بـ PowerShell: Confirm-SecureBootUEFI، إذا True أعد التشغيل، ثم أوقف Secure Boot من BIOS</li>
+<li><strong>"VMX/SVM is not supported":</strong> Control Panel → Turn Windows features on or off → أوقف Virtual Machine Platform و Hyper-V. إذا ما نفع: CMD كمسؤول → bcdedit /set hypervisorlaunchtype off → أعد التشغيل</li>
+<li><strong>"Incorrect HWID":</strong> CMD كمسؤول:
+<pre>wmic diskdrive get Caption, SerialNumber
+wmic baseboard get SerialNumber</pre>
+إذا أمر فشل، أعد تثبيت ويندوز</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+},
+{
+id:7,
+title:"Rust",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://image.api.playstation.com/vulcan/ap/rnd/202505/1909/12a0444a662450a4f8e0d3140a4d13de7a0b26477384e7ed.png",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"https://loader.colortune.ru",
+requiresSubscription:true,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>الـ Rust يحتاج إعدادات خاصة لازم تسويها قبل كل شي:</p><ul>
+<li>فعّل الافتراضي في BIOS: Intel → Intel Virtualization + Intel VT-d | AMD → AMD-V أو SVM</li>
+<li>أوقف Secure Boot من BIOS</li>
+<li>فعّل Hyper-V: Win+R → optionalfeatures → اختر Hyper-V Platform ✓ → OK</li>
+<li>شغّل CMD كمسؤول: bcdedit /set hypervisorlaunchtype auto</li>
+<li>احذف كل برامج الحماية الثالثة: Faceit, GameGuard, AnticheatExpert, Vanguard, Kaspersky, 360 Total Security, Avast</li>
+<li>إذا ويندوز 11: حمّل ملف win11_driver_OFF.reg من https://loader.colortune.ru/win11_driver_OFF.reg (كليك يمين → حفظ كـ) وشغّله واف Consent وأعد التشغيل</li>
+<li>ثبّت المكونات: x86 https://aka.ms/vs/17/release/vc_redist.x86.exe | x64 https://aka.ms/vs/17/release/vc_redist.x64.exe | DirectX https://www.microsoft.com/ru-ru/download/details.aspx?id=35</li>
+<li>Discord: افتح الإعدادات → Game Overlay → فعّل Use Overlay وأوقف Use Legacy Overlay. تحقق إن الـ Overlay يشتغل مع Rust. إذا ما يشتغل اللعبة لازم تكون Windowed/Fullscreen Windowed</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل Defender Control v2.1 من https://loader.colortune.ru/Defender%20Control%20v2.1.zip لإيقاف Windows Defender بالكامل (الطريقة العادية ما تكفي). أوقف كل الخيارات، أوقف SmartScreen. شغّل Dcontrol واضغط Disable — لازم يتحول للأحمر</li>
+<li>حمّل اللودر من https://loader.colortune.ru</li>
+<li>أدخل كود التفعيل في النافذة واضغط Enter</li>
+<li>إذا نجح ترى رسالة "Press f2 on the server"</li>
+<li>اضغط F2 على سيرفر في Rust</li>
+<li>انتظر حتى يحمل البرنامج</li>
+<li>القائمة على F2</li>
+<li>اللودر لازم يشتغل قبل اللعبة!</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<ul>
+<li>افتح/أغلق القائمة بزر F2</li>
+<li>اللودر لازم يشتغل قبل اللعبة!</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>تزامن الوقت بعد إدخال المفتاح:</strong> اذهب لإعدادات التاريخ والوقت واضغط "Synchronize"</li>
+<li><strong>خطأ "WdFilter.sys":</strong> تأكد إنك حمّلت Dcontrol من الخطوة 3.1 وهو أحمر</li>
+<li><strong>خطأ اتصال/DLL بعد تشغيل اللودر:</strong> شغّل اللودر بـ VPN</li>
+<li><strong>أغلق EasyAnticheat_EOS.Sys:</strong> البرنامج لازم يشتغل قبل اللعبة</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+},
+{
+id:8,
+title:"Valorant",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://www.riotgames.com/darkroom/1440/8d5c497da1c2eeec8cffa99b01abc64b:5329ca773963a5b739e98e715957ab39/ps-f2p-val-console-launch-16x9.jpg",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"https://loader.colortune.ru",
+requiresSubscription:true,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>الـ Valorant يحتاج إعدادات خاصة وتفاصيل إضافية:</p><ul>
+<li>فعّل الافتراضي في BIOS: Intel → Intel Virtualization + Intel VT-d | AMD → AMD-V أو SVM</li>
+<li>فعّل Hyper-V: Win+R → optionalfeatures → اختر Hyper-V Platform ✓ → OK</li>
+<li>شغّل CMD كمسؤول: bcdedit /set hypervisorlaunchtype auto</li>
+<li>احذف كل برامج الحماية الثالثة: Faceit, GameGuard, AnticheatExpert, Kaspersky, 360 Total Security, Avast</li>
+<li>إذا ويندوز 11: حمّل ملف win11_driver_OFF.reg من https://loader.colortune.ru/win11_driver_OFF.reg وشغّله وأعد التشغيل</li>
+<li>ثبّت المكونات: x86 + x64 + DirectX</li>
+<li>Discord: افتح الإعدادات → Game Overlay → فعّل Use Overlay وأوقف Use Legacy Overlay. تأكد إن الـ Overlay يبدأ مع فالورنت. إذا ما يشتغل اللعبة لازم تكون Windowed/Fullscreen Windowed. فعّل "Hardware Acceleration" من إعدادات Discord (اكتب في بحث الإعدادات)</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>حمّل اللودر من https://loader.colortune.ru</li>
+<li>أدخل كود التفعيل في النافذة واضغط Enter</li>
+<li>إذا نجح ترى رسالة "Press f1 in the main menu"</li>
+<li>اضغط F1 وانتظر حتى يحمل البرنامج</li>
+<li>القائمة على INSERT</li>
+<li>اللودر لازم يشتغل قبل اللعبة!</li>
+</ul>
+</div>`},
+{key:"menu",icon:"☰",title:"التحكم بالقائمة",body:`<div class="content-block">
+<ul>
+<li>افتح/غلق القائمة بزر INSERT</li>
+<li>للوحة مفاتيح صغيرة: Win+R → اكتب osk → Enter → استخدم زر Insert الافتراضي</li>
+<li>تحديث جدران الرؤية بزر F5</li>
+</ul>
+</div>`},
+{key:"fix",icon:"🔧",title:"حل الأخطاء والمشاكل",body:`<div class="content-block">
+<ul>
+<li><strong>تزامن الوقت بعد إدخال المفتاح:</strong> اذهب لإعدادات التاريخ والوقت واضغط "Synchronize"</li>
+<li><strong>خطأ اتصال/_dll بعد تشغيل اللودر:</strong> شغّل اللودر بـ VPN</li>
+<li><strong>القائمة ما تظهر على Insert / ما يوجد شعار:</strong> تحقق من بدء الـ Overlay في تبويب Game Overlay في Discord. تحقق من تفعيل "Hardware Acceleration" في Discord</li>
+</ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
+</div>`}
+]
+}];
+const grid=document.getElementById('gamesGrid'),searchInput=document.getElementById('searchInput'),overlay=document.getElementById('modalOverlay'),closeBtn=document.getElementById('modalClose'),modalArtwork=document.getElementById('modalArtwork'),modalTitle=document.getElementById('modalTitle'),guideAccordion=document.getElementById('guideAccordion'),downloadActions=document.getElementById('downloadActions'),canvas=document.getElementById('spaceCanvas'),ctx=canvas.getContext('2d');
+function renderCards(f){const q=(f||'').trim().toLowerCase();const v=ALLGAMES.filter(g=>(g.title+' '+g.category).toLowerCase().includes(q));grid.innerHTML=v.map(cardMarkup).join('');attachCardInteractions()}
+function cardMarkup(g){return '<article class="game-card" data-id="'+g.id+'"><img class="card-image" src="'+g.image+'" alt="'+g.title+' artwork"/><div class="card-content"><h2 class="card-title">'+g.title+'</h2><div class="card-meta"><span>دليل احترافي</span><span class="glow-dot"></span></div></div></article>'}
+function attachCardInteractions(){document.querySelectorAll('.game-card').forEach(c=>{c.addEventListener('click',()=>openModal(+c.dataset.id));c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();const x=(e.clientX-r.left)/r.width;const y=(e.clientY-r.top)/r.height;c.style.transform='perspective(900px) rotateX('+(.5-y)*8+'deg) rotateY('+(x-.5)*8+'deg) translateY(-10px) scale(1.02)'});c.addEventListener('mouseleave',()=>{c.style.transform=''})})}
+function renderDownloadArea(g){const u=(g.downloadUrl||'').trim();if(!u){downloadActions.innerHTML='';return}downloadActions.innerHTML='<a class="download-btn" href="'+u+'" target="_blank" rel="noopener">⬇ '+g.downloadLabel+'</a><p class="download-note">'+(g.requiresSubscription?'يجب أن يكون لديك اشتراك نشط للتحميل.':'يمكنك البدء بالتحميل مباشرة.')+'</p>'}
+function renderGuide(g){renderDownloadArea(g);guideAccordion.innerHTML=g.sections.map(s=>'<div class="accordion-item" data-target="'+s.key+'"><span class="accordion-title"><span class="accordion-icon">'+s.icon+'</span>'+s.title+'</span><span>▾</span></div><div class="accordion-body" id="'+s.key+'">'+s.body+'</div>').join('');guideAccordion.querySelectorAll('.accordion-item').forEach(i=>{i.addEventListener('click',()=>{const t=document.getElementById(i.dataset.target);const o=t.classList.contains('open');guideAccordion.querySelectorAll('.accordion-body').forEach(b=>b.classList.remove('open'));if(!o)t.classList.add('open')})})}
+function openModal(id){const g=ALLGAMES.find(x=>x.id===id);if(!g)return;modalTitle.textContent=g.title;modalArtwork.src=g.image;renderGuide(g);overlay.classList.add('show');document.body.style.overflow='hidden'}
+function closeModal(){overlay.classList.remove('show');document.body.style.overflow=''}
+closeBtn.addEventListener('click',closeModal);
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+searchInput.addEventListener('input',e=>renderCards(e.target.value));
+function createArtwork(t){return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="#060606"/><rect x="70" y="70" width="1060" height="660" rx="40" fill="url(%23g1)"/><circle cx="940" cy="220" r="120" fill="#f7f7f7" fill-opacity="0.08"/><circle cx="760" cy="560" r="180" fill="#c7c7c7" fill-opacity="0.08"/><text x="140" y="690" font-family="Segoe UI,Arial" font-size="42" fill="#f7f7f7" letter-spacing="4">'+t.toUpperCase()+'</text><text x="140" y="735" font-family="Segoe UI,Arial" font-size="24" fill="#c7c7c7" letter-spacing="5">CINEMATIC GUIDE</text><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#171717"/><stop offset="65%" stop-color="#090909"/><stop offset="100%" stop-color="#222222"/></linearGradient></defs></svg>')}
+function resizeCanvas(){canvas.width=Math.floor(window.innerWidth);canvas.height=Math.floor(window.innerHeight);ctx.setTransform(1,0,0,1,0,0)}
+const stars=Array.from({length:70},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.1+.2,a:Math.random()*.6+.15}));
+const nebulae=Array.from({length:3},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,radius:Math.random()*180+120,alpha:Math.random()*.04+.02}));
+function drawBackground(){resizeCanvas();const w=innerWidth,h=innerHeight;ctx.clearRect(0,0,w,h);const g=ctx.createRadialGradient(w*.3,h*.2,0,w*.3,h*.2,h*.75);g.addColorStop(0,'#0a0a0a');g.addColorStop(1,'#030303');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);nebulae.forEach(n=>{const gl=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.radius);gl.addColorStop(0,'rgba(255,255,255,'+n.alpha+')');gl.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=gl;ctx.beginPath();ctx.arc(n.x,n.y,n.radius,0,Math.PI*2);ctx.fill()});const t=performance.now()*.00003;stars.forEach(s=>{const dx=Math.sin(t+s.x*.001)*.18;const dy=Math.cos(t*.8+s.y*.001)*.12;const x=s.x+dx*18;const y=s.y+dy*18;ctx.beginPath();ctx.arc(x,y,s.r,0,Math.PI*2);ctx.fillStyle='rgba(247,247,247,'+(s.a+.2*Math.sin(t*2+s.x))+')';ctx.fill();if(s.r>.8){ctx.beginPath();ctx.arc(x,y,s.r*2.5,0,Math.PI*2);ctx.strokeStyle='rgba(199,199,199,'+(.05+s.a*.08)+')';ctx.stroke()}})}
+function animateBackground(){drawBackground();requestAnimationFrame(animateBackground)}
+window.addEventListener('resize',drawBackground);animateBackground();renderCards();
+</script>
+</body>
+</html>
