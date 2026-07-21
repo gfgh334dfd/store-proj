@@ -682,6 +682,65 @@ sections:[
 </ul><p>اذا فيه اي مشكلة تواصل معنا عبر سيرفرنا في الدسكورد</p>
 </div>`}
 ]
+},
+{
+id:9,
+title:"Macho FiveM",
+category:"",
+developer:"",
+version:"",
+description:"",
+image:"https://logos-world.net/wp-content/uploads/2021/03/FiveM-Symbol.png",
+downloadLabel:"تحميل اللودر",
+downloadUrl:"https://machocheats.com/download/",
+requiresSubscription:true,
+sections:[
+{key:"prep",icon:"⚙",title:"التحضير والتثبيت",body:`<div class="content-block">
+<p>قبل ما تبدأ، لازم تسوي الخطوات هذي بالترتيب عشان يشتغل بدون مشاكل:</p><ul>
+<li>أوقف الحماية الفورية من Windows</li>
+<li>أوقف Windows Defender بالكامل (استخدم برنامج Sordum DControl)</li>
+<li>احذف كل برامج الحماية (لا تكفي الإيقاف فقط)</li>
+<li>أوقف كل برامج التشغيل التلقائي</li>
+<li>أوقف Exploit Protection</li>
+<li>أوقف كل الـ Overlays إلا اللي تستخدمه مع هذا المنتج</li>
+<li>أعد تشغيل الجهاز بعد أي خطوة من هذي</li>
+<li>احذف Faceit و Vanguard بالكامل</li>
+</ul>
+</div>`},
+{key:"run",icon:"▶",title:"طريقة التشغيل",body:`<div class="content-block">
+<ul>
+<li>ادخل على رابط التحميل واحط الاشتراك واضغط دخول، راح يحمل لك الملف</li>
+<li>تأكد فايف ام طافي</li>
+<li>تأكد إيبك قيمز طافي</li>
+<li>تأكد السكرين مو شغال (الدسكورد)</li>
+<li>أوقف كل الحمايات نفس الشرح السابق</li>
+<li>شغّل الملف وانتظر شوي لين يظهر لك خانة فاضية</li>
+<li>حط الاشتراك واضغط Login</li>
+<li>بعد الدخول راح تظهر لك قائمة، اختر Lua Executor</li>
+<li><strong>Streamproof:</strong> هذا يخفي كل شي من التصوير والدسكورد، شغّله ما راح يظهر شي. إذا ما تبيه لا تختاره</li>
+<li><strong>السبوفر:</strong> ظاهر لك في اليسار. إذا تبي تستخدمه اقرأ شرح السبوفر في القسم اللي تحت. حمايته قوية، وإذا أنت تستخدم خفيف ما تحتاج سبوفر</li>
+<li>إذا خلصت من كل شي اضغط Load</li>
+<li>انتظر تقريباً 4 ثواني وراح يشتغل</li>
+<li>اشترك في اللعبة، راح يظهر لك إشعار البرنامج في الأعلى يمين أو يسار</li>
+<li>الزر اللي يظهر القائمة هو F9</li>
+</ul>
+<p>شرح القوائم فيه شروحات كثير في اليوتيوب بالعربي وبالإنجليزي</p>
+</div>`},
+{key:"spoofer",icon:"🛡",title:"ملاحظة بخصوص السبوفر",body:`<div class="content-block">
+<p>برنامج حماية الخصوصية المؤقت يحذف معرّفات جهازك اللي تسبب تحديد هويتك لما تدخل حساب جديد أو تنضم لسيرفرات مختلفة.</p>
+<ul>
+<li>تأكد إن اللودر قدر يلاقي بيانات البرنامج (إذا ما لقاها راح يطلع لك خطأ)</li>
+<li>ادخل سيرفر فحص التوكن وسجّل لقطة شاشة من الصفحة</li>
+<li>أغلق اللعبة</li>
+<li>ممكن تحتاج حساب ويندوز جديد إذا تبي تستهدف بعض السيرفرات</li>
+<li>ممكن تحتاج VPN أو تغيّر عنوان IP لبعض السيرفرات (معظمها)</li>
+<li>لازم تتأكد إن كل حساباتك مثل Xbox Live و Microsoft Live و Steam و Discord كلها منفصلة. راح تشوفها في سيرفر فحص التوكن وتشوف معنى كل توكن</li>
+<li>شغّل البرنامج مرة واحدة بعد كل إعادة تشغيل للجهاز واضغط New Account. إذا تم تحديد هويتك، لازم تعيد تشغيل الجهاز وتشغّل الأداة مرة ثانية وตกس New Account مرة ثانية</li>
+<li>الآن لازم ترجع لسيرفر فحص التوكن وتأكد إن كل التوكنات تغيرت (Anti-Spoof 1 ما لازم يتغير)</li>
+</ul>
+<p>ملاحظة</p>
+</div>`}
+]
 }];
 const grid=document.getElementById('gamesGrid'),searchInput=document.getElementById('searchInput'),overlay=document.getElementById('modalOverlay'),closeBtn=document.getElementById('modalClose'),modalArtwork=document.getElementById('modalArtwork'),modalTitle=document.getElementById('modalTitle'),guideAccordion=document.getElementById('guideAccordion'),downloadActions=document.getElementById('downloadActions'),canvas=document.getElementById('spaceCanvas'),ctx=canvas.getContext('2d');
 function renderCards(f){const q=(f||'').trim().toLowerCase();const v=ALLGAMES.filter(g=>(g.title+' '+g.category).toLowerCase().includes(q));grid.innerHTML=v.map(cardMarkup).join('');attachCardInteractions()}
